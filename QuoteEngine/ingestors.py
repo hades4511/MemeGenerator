@@ -11,7 +11,7 @@ import pandas as pd
 from .models import QuoteModel
 
 
-class IngestorNotFoundError(Exception):
+class IngestorNotFound(Exception):
     """Error for unknown file types ingestors."""
 
     def __init__(self, msg):
@@ -19,7 +19,7 @@ class IngestorNotFoundError(Exception):
         super().__init__(msg)
 
 
-class PDFToTextNotFoundError(Exception):
+class PDFToTextNotFound(Exception):
     """Error for unknown file types ingestors."""
 
     def __init__(self, msg):
@@ -73,8 +73,7 @@ class PDFIngestor(IngestorInterface, TXTParser):
                 lines = temp_txt_file.readlines()
                 return cls._populate_quotes_from_txt(lines)
         except FileNotFoundError:
-            pass
-            # raise PDFToTextNotFoundError('"pdftotext" is a required module, please install it before parsing pdf files.')
+            raise PDFToTextNotFound('"pdftotext" is a required module, please install it before parsing pdf files.')
 
 
 class TextIngestor(IngestorInterface, TXTParser):
@@ -139,7 +138,7 @@ class Ingestor:
         try:
             class_instance = cls.classes_mapping[file_extension]()
         except KeyError:
-            raise IngestorNotFoundError(f'Invalid file extension: {file_extension}')
+            raise IngestorNotFound(f'Invalid file extension: {file_extension}')
         quotes = []
         try:
             if class_instance.can_ingest(path):
@@ -147,7 +146,7 @@ class Ingestor:
         except FileNotFoundError:
             raise FileNotFoundError(f'No such file or directory: {path}')
         except AttributeError:
-            raise IngestorNotFoundError(f'No Ingestor found for file: {path}')
+            raise IngestorNotFound(f'No Ingestor found for file: {path}')
         return quotes
 
     @staticmethod

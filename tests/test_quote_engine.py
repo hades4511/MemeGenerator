@@ -4,7 +4,7 @@ import os
 import unittest
 from pathlib import Path
 
-from QuoteEngine.ingestors import Ingestor, IngestorNotFoundError
+from QuoteEngine.ingestors import Ingestor, IngestorNotFound
 from QuoteEngine.models import QuoteModel
 
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
@@ -51,7 +51,7 @@ class TestIngestors(unittest.TestCase):
         """Test exception raise on invalid file format."""
         try:
             Ingestor.parse(self.incorrect_file_format)
-        except IngestorNotFoundError:
+        except IngestorNotFound:
             pass
         else:
             self.fail('No exception raised for invalid file format.')
@@ -60,7 +60,7 @@ class TestIngestors(unittest.TestCase):
         """Test exception raise on no file format."""
         try:
             Ingestor.parse(self.incorrect_file_format)
-        except IngestorNotFoundError:
+        except IngestorNotFound:
             pass
         else:
             self.fail('No exception raised for missing file format.')

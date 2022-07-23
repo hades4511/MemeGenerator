@@ -37,6 +37,3 @@ jobs:
     - name: Test with pydocstyle
       run: |
         pydocstyle meme.py app.py ./QuoteEngine ./MemeEngine ./tests
-    - name: Test with unittest
-      run: |
-        python3 -m unittest

@@ -73,7 +73,8 @@ class PDFIngestor(IngestorInterface, TXTParser):
                 lines = temp_txt_file.readlines()
                 return cls._populate_quotes_from_txt(lines)
         except FileNotFoundError:
-            raise PDFToTextNotFoundError('"pdftotext" is a required module, please install it before parsing pdf files.')
+            pass
+            # raise PDFToTextNotFoundError('"pdftotext" is a required module, please install it before parsing pdf files.')
 
 
 class TextIngestor(IngestorInterface, TXTParser):

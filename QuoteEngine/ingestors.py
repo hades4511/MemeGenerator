@@ -11,6 +11,22 @@ import pandas as pd
 from .models import QuoteModel
 
 
+class IngestorNotFoundError(Exception):
+    """Error for unknown file types ingestors."""
+
+    def __init__(self, msg):
+        """Initialize parent constructor."""
+        super().__init__(msg)
+
+
+class PDFToTextNotFoundError(Exception):
+    """Error for unknown file types ingestors."""
+
+    def __init__(self, msg):
+        """Initialize parent constructor."""
+        super().__init__(msg)
+
+
 class IngestorInterface(ABC):
     """Abstract class for implementing different ingestors."""
 
@@ -51,10 +67,13 @@ class PDFIngestor(IngestorInterface, TXTParser):
     @classmethod
     def parse(cls, path: str) -> list[QuoteModel]:
         """Parse data from pdf file to a list of QuoteModels."""
-        with tempfile.NamedTemporaryFile(suffix='.txt') as temp_txt_file:
-            subprocess.run(("pdftotext", '-raw', path, temp_txt_file.name), check=True)
-            lines = temp_txt_file.readlines()
-            return cls._populate_quotes_from_txt(lines)
+        try:
+            with tempfile.NamedTemporaryFile(suffix='.txt') as temp_txt_file:
+                subprocess.run(("pdftotext", '-raw', path, temp_txt_file.name), check=True)
+                lines = temp_txt_file.readlines()
+                return cls._populate_quotes_from_txt(lines)
+        except FileNotFoundError:
+            raise PDFToTextNotFoundError('"pdftotext" is a required module, please install it before parsing pdf files.')
 
 
 class TextIngestor(IngestorInterface, TXTParser):
@@ -100,14 +119,6 @@ class DocxIngestor(IngestorInterface):
             else:
                 quotes.append(QuoteModel(body, author))
         return quotes
-
-
-class IngestorNotFoundError(Exception):
-    """Error for unknown file types ingestors."""
-
-    def __init__(self, msg):
-        """Initialize parent constructor."""
-        super().__init__(msg)
 
 
 class Ingestor:

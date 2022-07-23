@@ -9,6 +9,7 @@ from tempfile import NamedTemporaryFile
 
 import requests
 from flask import Flask, render_template, request
+from PIL import UnidentifiedImageError
 
 from MemeEngine.engine import MemeEngine
 from QuoteEngine.ingestors import Ingestor
@@ -69,14 +70,18 @@ def meme_form():
 @app.route('/create', methods=['POST'])
 def meme_post():
     """Create a user defined meme."""
-    image_url = request.form.get('image_url')
     quote_body = request.form.get('body')
     quote_author = request.form.get('author')
 
-    url_image_path = save_image_from_url(image_url)
-    path = meme.make_meme(url_image_path, quote_body, quote_author)
-    os.remove(url_image_path)
+    try:
+        url_image_path = save_image_from_url(request.form.get('image_url'))
+        path = meme.make_meme(url_image_path, quote_body, quote_author)
+    except requests.exceptions.ConnectionError:
+        return render_template('error.html', msg='Invalid URL provided.')
+    except UnidentifiedImageError:
+        return render_template('error.html', msg='Invalid image type provided.')
 
+    os.remove(url_image_path)
     return render_template('meme.html', path=create_static_path(path))
 
 

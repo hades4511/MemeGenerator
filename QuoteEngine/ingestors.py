@@ -4,6 +4,7 @@ import os
 import subprocess
 import tempfile
 from abc import ABC, abstractmethod
+from typing import List
 
 import docx
 import pandas as pd
@@ -40,7 +41,7 @@ class IngestorInterface(ABC):
 
     @classmethod
     @abstractmethod
-    def parse(cls, path: str) -> list[QuoteModel]:
+    def parse(cls, path: str) -> List[QuoteModel]:
         """Parse data from file to a list of QuoteModels."""
         raise NotImplementedError
 
@@ -49,7 +50,7 @@ class TXTParser:
     """Parse quote models from txt files."""
 
     @staticmethod
-    def _populate_quotes_from_txt(lines: list) -> list[QuoteModel]:
+    def _populate_quotes_from_txt(lines: list) -> List[QuoteModel]:
         quotes = []
         for line in lines:
             line = line.decode("utf-8") if type(line) is bytes else line
@@ -65,7 +66,7 @@ class PDFIngestor(IngestorInterface, TXTParser):
     extension = '.pdf'
 
     @classmethod
-    def parse(cls, path: str) -> list[QuoteModel]:
+    def parse(cls, path: str) -> List[QuoteModel]:
         """Parse data from pdf file to a list of QuoteModels."""
         try:
             with tempfile.NamedTemporaryFile(suffix='.txt') as temp_txt_file:
@@ -82,7 +83,7 @@ class TextIngestor(IngestorInterface, TXTParser):
     extension = '.txt'
 
     @classmethod
-    def parse(cls, path: str) -> list[QuoteModel]:
+    def parse(cls, path: str) -> List[QuoteModel]:
         """Parse data from txt file to a list of QuoteModels."""
         with open(path, 'r') as txt_file:
             lines = txt_file.readlines()
@@ -95,7 +96,7 @@ class CSVIngestor(IngestorInterface):
     extension = '.csv'
 
     @classmethod
-    def parse(cls, path: str) -> list[QuoteModel]:
+    def parse(cls, path: str) -> List[QuoteModel]:
         """Parse data from csv file to a list of QuoteModels."""
         csv_rows = pd.read_csv(path)
         return [QuoteModel(row["body"], row["author"]) for _, row in csv_rows.iterrows()]
@@ -107,7 +108,7 @@ class DocxIngestor(IngestorInterface):
     extension = '.docx'
 
     @classmethod
-    def parse(cls, path: str) -> list[QuoteModel]:
+    def parse(cls, path: str) -> List[QuoteModel]:
         """Parse data from docx file to a list of QuoteModels."""
         quotes = []
         doc = docx.Document(path)
@@ -132,7 +133,7 @@ class Ingestor:
     }
 
     @classmethod
-    def parse(cls, path: str) -> list[QuoteModel]:
+    def parse(cls, path: str) -> List[QuoteModel]:
         """Parse data from file path."""
         _, file_extension = os.path.splitext(path)
         try:
@@ -150,7 +151,7 @@ class Ingestor:
         return quotes
 
     @staticmethod
-    def parse_quotes(file_paths: list) -> list[QuoteModel]:
+    def parse_quotes(file_paths: list) -> List[QuoteModel]:
         """Parse quotes from a list of files."""
         quotes = []
         for file_path in file_paths:
